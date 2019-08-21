@@ -1,0 +1,53 @@
+import com.google.common.base.Objects
+
+buildscript {
+    repositories {
+        repositories {
+            mavenCentral()
+            maven { url 'https://dl.bintray.com/palantir/releases/' }
+            maven { url 'https://plugins.gradle.org/m2/' }
+        }
+    }
+
+    dependencies {
+        classpath 'com.palantir.gradle.conjure:gradle-conjure:4.12.0'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:12.0.0'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://dl.bintray.com/palantir/releases/'
+    }
+}
+
+apply plugin: 'java-library'
+apply plugin: 'com.palantir.conjure-publish'
+apply from: "$rootDir/gradle/publish-jar.gradle"
+
+group 'com.palantir.repro'
+version '1.0.0'
+
+dependencies {
+    conjureCompiler 'com.palantir.conjure:conjure:4.4.0'
+}
+
+publishing.repositories {
+    maven {
+        name = "maven-conjure"
+        url = "https://my.conjure.repository"
+    }
+}
+
+disablePublishToOtherRepos(getProject(), "conjure", "maven-conjure")
+disablePublishToOtherRepos(getProject(), "nebula", "maven-jar")
+
+static def disablePublishToOtherRepos(project, publicationName, repoName) {
+    project.tasks.withType(PublishToMavenRepository.class).configureEach {
+        if (Objects.equal(it.getRepository().getName(), repoName)) {
+            it.setEnabled(Objects.equal(it.getPublication().getName(), publicationName));
+        }
+    }
+}

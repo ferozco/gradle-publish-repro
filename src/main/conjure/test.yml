@@ -1,0 +1,7 @@
+types:
+  definitions:
+    default-package: test.test.api
+    objects:
+      StringExample:
+        fields:
+          string: string
